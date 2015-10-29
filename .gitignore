@@ -6,3 +6,10 @@
 /PacMan-vs-Ghosts-Exercises/.settings
 bin
 /PacMan-vs-Ghosts-Solutions
+/nbproject/private/
+/build/
+
+/nbproject/
+/build.xml
+/build
+/manifest.mf

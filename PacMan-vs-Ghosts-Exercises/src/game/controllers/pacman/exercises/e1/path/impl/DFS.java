@@ -1,11 +1,17 @@
 package game.controllers.pacman.exercises.e1.path.impl;
 
+import game.controllers.Direction;
 import java.util.Collection;
 
 import game.controllers.pacman.exercises.e1.graph.Graph;
 import game.controllers.pacman.exercises.e1.graph.Node;
+import game.controllers.pacman.exercises.e1.graph.Link;
 import game.controllers.pacman.exercises.e1.path.IPathFinder;
 import game.controllers.pacman.exercises.e1.path.Path;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * TODO: Implement DEAPTH-FIRST-SEARCH
@@ -14,87 +20,175 @@ import game.controllers.pacman.exercises.e1.path.Path;
  */
 public class DFS implements IPathFinder {
 
-	@Override
-	public void init(Graph graph, Node start, Node goal) {
-		// TODO Auto-generated method stub
-		
-	}
+    Graph graph;
+    Node start;
+    Node goal;
 
-	@Override
-	public void step() {
-		// TODO Auto-generated method stub
-		
-	}
+    ArrayList<Node> closedList;
+    ArrayDeque<Node> openedList;
+    Map<Node, Node> parentMap;
 
-	@Override
-	public boolean isFinished() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+    int steps;
 
-	@Override
-	public boolean isPathFound() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+    boolean isFinished;
+    boolean isPathFound;
+    boolean isRunning;
 
-	@Override
-	public Path getPath() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    Path path;
 
-	@Override
-	public Node getParent(Node node) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public DFS() {
+        closedList = new ArrayList<>();
+        openedList = new ArrayDeque<>();
+        parentMap = new HashMap<>();
+    }
 
-	@Override
-	public Collection<Node> getClosedList() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public void init(Graph graph, Node start, Node goal) {
+        this.graph = graph;
+        this.start = start;
+        this.goal = goal;
+        this.isRunning = true;
 
-	@Override
-	public Collection<Node> getOpenList() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        openedList.add(start);
+    }
 
-	@Override
-	public int getSteps() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+    @Override
+    public void step() {
+        if (this.isFinished()) {
+            return;
+        }
 
-	@Override
-	public Node getStart() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        if (openedList.isEmpty()) {
+            this.isFinished = true;
+            this.isRunning = false;
+            return;
+        }
 
-	@Override
-	public Node getGoal() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        Node curr = openedList.pop();
 
-	@Override
-	public boolean isRunning() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-	
-	@Override
-	public String getName() {
-		return "DFS[" + getSteps() + "]";
-	}
+        for (Map.Entry<Direction, Link> item : curr.links.entrySet()) {
+            Direction dir = item.getKey();
+            Link link = item.getValue();
 
-	@Override
-	public void reset() {
-		// TODO Auto-generated method stub
-		
-	}
+            Node next = link.n1 == curr ? link.n2 : link.n1;
+            
+            if (next == goal) {
+                parentMap.put(next, curr);
+                createPath();
+                return;
+            }
+            
+            if (closedList.contains(next)) {
+                // do nothing or reopen?
+            } else if (openedList.contains(next)) {
+                // do nothing?
+            } else {
+                openedList.addFirst(next);
+                parentMap.put(next, curr);
+            }
+
+        }
+
+        closedList.add(curr);
+        steps++;
+    }
+
+    @Override
+    public boolean isFinished() {
+        return isFinished;
+    }
+
+    @Override
+    public boolean isPathFound() {
+        return isPathFound;
+    }
+
+    private void createPath() {
+        this.isFinished = true;
+        this.isPathFound = true;
+        this.isRunning = false;
+
+        Node curr = this.goal;
+        // create path
+        ArrayDeque<Node> foundPath = new ArrayDeque<>();
+        foundPath.addFirst(curr);
+
+        while (parentMap.containsKey(curr)) {
+            curr = parentMap.get(curr);
+            foundPath.addFirst(curr);
+        }
+
+        path = new Path(foundPath.toArray(new Node[0]));
+    }
+
+    @Override
+    public Path getPath() {
+        if (!this.isFinished()) {
+            return null;
+        }
+
+        return path;
+    }
+
+    @Override
+    public Node getParent(Node node) {
+        if (parentMap.containsKey(node)) {
+            return parentMap.get(node);
+        }
+
+        return null;
+    }
+
+    @Override
+    public Collection<Node> getClosedList() {
+        return closedList;
+    }
+
+    @Override
+    public Collection<Node> getOpenList() {
+        return openedList;
+    }
+
+    @Override
+    public int getSteps() {
+        return steps;
+    }
+
+    @Override
+    public Node getStart() {
+        return start;
+    }
+
+    @Override
+    public Node getGoal() {
+        return goal;
+    }
+
+    @Override
+    public boolean isRunning() {
+        return isRunning;
+    }
+
+    @Override
+    public String getName() {
+        return "DFS[" + getSteps() + "]";
+    }
+
+    @Override
+    public void reset() {
+        steps = 0;
+        isFinished = false;
+        isPathFound = false;
+        isRunning = false;
+
+        goal = null;
+        start = null;
+        graph = null;
+        path = null;
+
+        openedList.clear();
+        closedList.clear();
+        parentMap.clear();
+    }
 
 }
