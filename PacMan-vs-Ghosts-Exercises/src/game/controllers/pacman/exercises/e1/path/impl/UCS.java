@@ -105,6 +105,7 @@ public class UCS implements IPathFinder {
 
                 if (newDist < openedLengths.get(i)) {
                     openedLengths.set(i, newDist);
+                    parentMap.put(next, curr);
                     bubbleDown(i);
                 }
 
@@ -114,7 +115,6 @@ public class UCS implements IPathFinder {
                 openedLengths.add(newDist);
 
                 bubbleDown(openedList.size() - 1);
-
                 parentMap.put(next, curr);
             }
 
